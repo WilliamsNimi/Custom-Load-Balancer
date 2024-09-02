@@ -5,6 +5,7 @@ import json
 import concurrent.futures
 import time
 import random
+import threading
 
 start_time = time.time()
 
@@ -58,5 +59,7 @@ class BasicServer(BaseHTTPRequestHandler):
             executor.map(self.handle_reqs, active_servers)
         print(time.time() - start_time)"""
 
-port = HTTPServer(('', 80), BasicServer)
-port.serve_forever()
+    
+if __name__ == "__main__":
+    port = HTTPServer(('', 80), BasicServer)
+    port.serve_forever()
