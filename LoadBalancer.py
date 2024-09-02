@@ -8,7 +8,7 @@ import random
 
 start_time = time.time()
 
-servers = {("127.0.0.1", 8080): 0, ("127.0.0.1", 9090): 0}
+servers = {("127.0.0.1", 8080): 0, ("127.0.0.1", 9090): 0, ("127.0.0.1", 5050): 0, ("127.0.0.1", 2000): 0}
 active_servers = {}
 minimum_load = 0
 load_count = 0
