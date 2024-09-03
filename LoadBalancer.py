@@ -24,7 +24,8 @@ def health_check(servers):
                 if server not in active_servers:
                     active_servers[server] = 0
         except Exception as e:
-            print(e) #TODO: Add a logger here to a file
+            with open("Error_Logs.txt", "a") as f:
+                f.write(f"{time.time()} :{ e} for {server}. \n")
     return active_servers
 
 def round_robin():
@@ -40,7 +41,7 @@ def round_robin():
             load_count = 0
             
 class BasicServer(BaseHTTPRequestHandler):
-    
+
     def handle_reqs(self, server):
         url = "http://" + server[0] + ":" + str(server[1])
         res = requests.get(url)
@@ -53,11 +54,9 @@ class BasicServer(BaseHTTPRequestHandler):
             active_servers[server] += 1
             
     def do_GET(self):
-        #self.handle_reqs(random.choice(health_check(servers))) #randomly selecting servers from a list of active servers
-        self.handle_reqs(round_robin())
-        """with concurrent.futures.ThreadPoolExecutor(max_workers = 2) as executor:
-            executor.map(self.handle_reqs, active_servers)
-        print(time.time() - start_time)"""
+        #self.handle_reqs(round_robin())
+        with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor:
+            executor.submit(self.handle_reqs(round_robin()))
 
     
 if __name__ == "__main__":
