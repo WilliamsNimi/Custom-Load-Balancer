@@ -1,7 +1,7 @@
 import os
 import concurrent.futures
 
-load = 10
+load =1000
 def req(count):
     os.system("curl localhost")
     print(count)

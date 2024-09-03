@@ -28,8 +28,7 @@ def health_check(servers):
                 f.write(f"{time.time()} :{ e} for {server}. \n")
     return active_servers
 
-def round_robin():
-    active_servers = health_check(servers)
+def round_robin(active_servers):
     global minimum_load
     global load_count
     for server, load in active_servers.items():
@@ -41,22 +40,23 @@ def round_robin():
             load_count = 0
             
 class BasicServer(BaseHTTPRequestHandler):
-
+    active_servers = health_check(servers)
     def handle_reqs(self, server):
-        url = "http://" + server[0] + ":" + str(server[1])
-        res = requests.get(url)
-        if res.status_code == 200:
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(bytes(json.dumps(res.json()), 'utf-8'))
-            self.wfile.write(bytes("\n", 'utf-8'))
-            active_servers[server] += 1
+        if type(server) is tuple:
+            url = "http://" + server[0] + ":" + str(server[1])
+            res = requests.get(url)
+            if res.status_code == 200:
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(bytes(json.dumps(res.json()), 'utf-8'))
+                self.wfile.write(bytes("\n", 'utf-8'))
+                active_servers[server] += 1
             
     def do_GET(self):
         #self.handle_reqs(round_robin())
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor:
-            executor.submit(self.handle_reqs(round_robin()))
+            executor.submit(self.handle_reqs(round_robin(active_servers)))
 
     
 if __name__ == "__main__":
