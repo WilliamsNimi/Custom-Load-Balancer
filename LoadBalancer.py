@@ -24,7 +24,7 @@ def health_check(servers):
                 if server not in active_servers:
                     active_servers[server] = 0
         except Exception as e:
-            with open("Error_Logs.txt", "a") as f:
+            with open("Error_Logs/Error_Logs.txt", "a") as f:
                 f.write(f"{time.time()} :{ e} for {server}. \n")
     return active_servers
 
@@ -40,7 +40,6 @@ def round_robin(active_servers):
             load_count = 0
             
 class BasicServer(BaseHTTPRequestHandler):
-    active_servers = health_check(servers)
     def handle_reqs(self, server):
         if type(server) is tuple:
             url = "http://" + server[0] + ":" + str(server[1])
@@ -54,6 +53,7 @@ class BasicServer(BaseHTTPRequestHandler):
                 active_servers[server] += 1
             
     def do_GET(self):
+        active_servers = health_check(servers)
         #self.handle_reqs(round_robin())
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor:
             executor.submit(self.handle_reqs(round_robin(active_servers)))

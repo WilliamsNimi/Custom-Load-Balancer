@@ -7,7 +7,7 @@ try:
     load = sys.argv[1]
     load = int(load)
 except Exception as e:
-    with open("LoadTesterErrorLog.txt", 'a') as f:
+    with open("Error_Logs/LoadTesterErrorLog.txt", 'a') as f:
         f.write(f"{time.time()}: {e}")
     print("Usage: Python3 get_reqs.py *Load int value*")
 
