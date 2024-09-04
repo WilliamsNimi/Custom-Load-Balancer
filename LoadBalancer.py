@@ -6,15 +6,27 @@ import concurrent.futures
 import time
 import random
 import threading
+import csv
 
 start_time = time.time()
 
-servers = {("127.0.0.1", 8080): 0, ("127.0.0.1", 9090): 0, ("127.0.0.1", 5050): 0, ("127.0.0.1", 2000): 0}
+servers2 = {}
 active_servers = {}
 minimum_load = 0
 load_count = 0
 
-def health_check(servers):
+def config():
+    """Configures the load balancer using a csv file of IPs and Ports"""
+    with open("servers_config.csv", newline='') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            row_list = row[0].split()
+            servers2[(row_list[0], int(row_list[1]))] = 0
+    return servers2
+
+servers2 = config()
+
+def health_check(servers2):
     """ Run check on all available servers and adds active servers to active_servers list"""
     for server, load in servers.items():
         try:
@@ -54,7 +66,6 @@ class BasicServer(BaseHTTPRequestHandler):
             
     def do_GET(self):
         active_servers = health_check(servers)
-        #self.handle_reqs(round_robin())
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor:
             executor.submit(self.handle_reqs(round_robin(active_servers)))
 
