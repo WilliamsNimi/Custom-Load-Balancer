@@ -28,7 +28,7 @@ servers2 = config()
 
 def health_check(servers2):
     """ Run check on all available servers and adds active servers to active_servers list"""
-    for server, load in servers.items():
+    for server, load in servers2.items():
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as checker:
                 checker.connect(server)
@@ -65,7 +65,7 @@ class BasicServer(BaseHTTPRequestHandler):
                 active_servers[server] += 1
             
     def do_GET(self):
-        active_servers = health_check(servers)
+        active_servers = health_check(servers2)
         with concurrent.futures.ThreadPoolExecutor(max_workers = 3) as executor:
             executor.submit(self.handle_reqs(round_robin(active_servers)))
 
